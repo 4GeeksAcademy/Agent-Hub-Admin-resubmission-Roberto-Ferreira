@@ -105,17 +105,17 @@
         activeSection: localStorage.getItem("agenthub-section") || "dashboard",
         theme: localStorage.getItem("agenthub-theme") || (document.documentElement.classList.contains("dark") ? "dark" : "light"),
         users: [
-          { id: 1, name: "Nora Fields", email: "nora.fields@agenthub.internal", role: "Platform Admin", status: "Active", region: "US-East", lastSeen: "2 minutes ago" },
-          { id: 2, name: "Daniel Wu", email: "daniel.wu@agenthub.internal", role: "Security Analyst", status: "Active", region: "US-West", lastSeen: "12 minutes ago" },
-          { id: 3, name: "Amira Hassan", email: "amira.hassan@agenthub.internal", role: "Contract Ops", status: "Review", region: "EMEA", lastSeen: "45 minutes ago" },
-          { id: 4, name: "Sofia Alvarez", email: "sofia.alvarez@agenthub.internal", role: "Support Lead", status: "Active", region: "LATAM", lastSeen: "1 hour ago" },
-          { id: 5, name: "Marcus Reed", email: "marcus.reed@agenthub.internal", role: "Agent Auditor", status: "Suspended", region: "US-Central", lastSeen: "Yesterday" },
+          { id: 1, name: "Nora Fields", email: "nora.fields@agenthub.internal", plan: "Enterprise", role: "Platform Admin", status: "Active", region: "US-East", lastSeen: "2 minutes ago" },
+          { id: 2, name: "Daniel Wu", email: "daniel.wu@agenthub.internal", plan: "Growth", role: "Security Analyst", status: "Active", region: "US-West", lastSeen: "12 minutes ago" },
+          { id: 3, name: "Amira Hassan", email: "amira.hassan@agenthub.internal", plan: "Scale", role: "Contract Ops", status: "Review", region: "EMEA", lastSeen: "45 minutes ago" },
+          { id: 4, name: "Sofia Alvarez", email: "sofia.alvarez@agenthub.internal", plan: "Enterprise", role: "Support Lead", status: "Active", region: "LATAM", lastSeen: "1 hour ago" },
+          { id: 5, name: "Marcus Reed", email: "marcus.reed@agenthub.internal", plan: "Starter", role: "Agent Auditor", status: "Suspended", region: "US-Central", lastSeen: "Yesterday" },
         ],
         agents: [
           {
             id: 1,
             name: "Atlas Routing Agent",
-            status: "Healthy",
+            status: "Active",
             owner: "Platform Ops",
             prompt: "Route incoming requests to the correct execution path while keeping latency below target.",
             skills: ["Intent Classification", "Traffic Balancing", "Priority Escalation"],
@@ -123,7 +123,7 @@
           {
             id: 2,
             name: "Beacon Support Agent",
-            status: "Monitoring",
+            status: "Inactive",
             owner: "Customer Support",
             prompt: "Diagnose customer issues, suggest recovery actions, and escalate incidents that require human review.",
             skills: ["Ticket Summarization", "Knowledge Lookup", "Incident Escalation"],
@@ -131,7 +131,7 @@
           {
             id: 3,
             name: "Ledger Contract Agent",
-            status: "Healthy",
+            status: "Active",
             owner: "Contract Ops",
             prompt: "Validate skill contract pricing, flag anomalies, and prepare approval summaries for administrators.",
             skills: ["Cost Validation", "Contract Diffing", "Approval Drafting"],
@@ -139,7 +139,7 @@
           {
             id: 4,
             name: "Pulse Monitor Agent",
-            status: "Degraded",
+            status: "Failing",
             owner: "Reliability",
             prompt: "Aggregate runtime signals, prioritize error spikes, and draft the first incident response recommendation.",
             skills: ["Incident Escalation", "Telemetry Parsing", "Anomaly Detection"],
@@ -161,60 +161,64 @@
         contracts: [
           {
             id: "CTR-1001",
+            client: "Nora Fields",
             agent: "Atlas Routing Agent",
-            status: "Active",
-            totalCost: 1800,
-            updated: "2026-08-02",
+            startDate: "2026-05-01",
+            endDate: "2026-10-31",
+            totalCost: 12800,
             items: [
-              { skill: "Intent Classification", price: 700 },
-              { skill: "Traffic Balancing", price: 650 },
-              { skill: "Priority Escalation", price: 450 },
+              { skill: "Intent Classification", price: 4600 },
+              { skill: "Traffic Balancing", price: 4300 },
+              { skill: "Priority Escalation", price: 3900 },
             ],
           },
           {
             id: "CTR-1002",
+            client: "Daniel Wu",
             agent: "Beacon Support Agent",
-            status: "Review",
-            totalCost: 1620,
-            updated: "2026-08-01",
+            startDate: "2026-04-15",
+            endDate: "2026-09-15",
+            totalCost: 14650,
             items: [
-              { skill: "Ticket Summarization", price: 540 },
-              { skill: "Knowledge Lookup", price: 510 },
-              { skill: "Incident Escalation", price: 570 },
+              { skill: "Ticket Summarization", price: 4700 },
+              { skill: "Knowledge Lookup", price: 4550 },
+              { skill: "Incident Escalation", price: 5400 },
             ],
           },
           {
             id: "CTR-1003",
+            client: "Amira Hassan",
             agent: "Ledger Contract Agent",
-            status: "Active",
-            totalCost: 1940,
-            updated: "2026-08-03",
+            startDate: "2026-06-01",
+            endDate: "2026-12-01",
+            totalCost: 17300,
             items: [
-              { skill: "Cost Validation", price: 720 },
-              { skill: "Contract Diffing", price: 610 },
-              { skill: "Approval Drafting", price: 610 },
+              { skill: "Cost Validation", price: 5900 },
+              { skill: "Contract Diffing", price: 5600 },
+              { skill: "Approval Drafting", price: 5800 },
             ],
           },
           {
             id: "CTR-1004",
+            client: "Sofia Alvarez",
             agent: "Pulse Monitor Agent",
-            status: "Attention",
-            totalCost: 1710,
-            updated: "2026-08-04",
+            startDate: "2026-03-20",
+            endDate: "2026-08-20",
+            totalCost: 15950,
             items: [
-              { skill: "Incident Escalation", price: 560 },
-              { skill: "Telemetry Parsing", price: 540 },
-              { skill: "Anomaly Detection", price: 610 },
+              { skill: "Incident Escalation", price: 5200 },
+              { skill: "Telemetry Parsing", price: 4950 },
+              { skill: "Anomaly Detection", price: 5800 },
             ],
           },
         ],
         errors: [
-          { id: 1, timestamp: "2026-08-04 09:12", source: "Pulse Monitor Agent", severity: "Critical", summary: "Telemetry parsing backlog exceeded the threshold for three consecutive checks.", details: "The telemetry parser queue remained over 8,000 events for 15 minutes, increasing incident triage latency." },
-          { id: 2, timestamp: "2026-08-04 08:47", source: "Beacon Support Agent", severity: "High", summary: "Knowledge lookup returned stale runbook version during escalation workflow.", details: "A cached document version omitted the latest escalation contact rotation for tier-two support." },
-          { id: 3, timestamp: "2026-08-04 08:15", source: "Atlas Routing Agent", severity: "Medium", summary: "Priority escalation confidence dipped below the policy target.", details: "Routing confidence fell to 0.78 for premium incidents in the APAC region after a queue burst." },
-          { id: 4, timestamp: "2026-08-04 07:42", source: "Ledger Contract Agent", severity: "High", summary: "Contract diffing flagged a duplicate pricing band in an active renewal.", details: "A renewal draft duplicated a premium support line item, creating a mismatched total cost." },
-          { id: 5, timestamp: "2026-08-03 22:06", source: "Platform Ops", severity: "Low", summary: "Manual review queue exceeded the preferred overnight target.", details: "The overnight review queue reached 14 items after maintenance completed later than planned." },
-          { id: 6, timestamp: "2026-08-03 20:51", source: "Pulse Monitor Agent", severity: "Resolved", summary: "Anomaly detection rule misclassified scheduled load tests as incidents.", details: "The sensitivity threshold was tuned and the false-positive stream stopped after deployment." },
+          { id: 1, timestamp: "2026-08-04 09:12", agent: "Pulse Monitor Agent", errorType: "Critical", summary: "Telemetry parsing backlog exceeded the threshold for three consecutive checks.", details: "The telemetry parser queue remained over 8,000 events for 15 minutes, increasing incident triage latency.", trace: "Trace ID: ERR-9012\nQueueDepthExceededError: telemetry queue depth 8124 exceeded ceiling 6000\n  at PulseMonitorAgent.parseTelemetryBatch (runtime/pulse-monitor.js:214)\n  at processTelemetryWindow (runtime/pulse-monitor.js:301)\n  at async scheduler.tick (runtime/scheduler.js:88)" },
+          { id: 2, timestamp: "2026-08-04 08:47", agent: "Beacon Support Agent", errorType: "Warning", summary: "Knowledge lookup returned stale runbook version during escalation workflow.", details: "A cached document version omitted the latest escalation contact rotation for tier-two support.", trace: "Trace ID: ERR-8935\nWarning: cached document version mismatch during escalation lookup\n  at BeaconSupportAgent.loadRunbook (runtime/beacon-support.js:142)\n  at async BeaconSupportAgent.composeEscalationStep (runtime/beacon-support.js:198)" },
+          { id: 3, timestamp: "2026-08-04 08:15", agent: "Atlas Routing Agent", errorType: "Minor", summary: "Priority escalation confidence dipped below the policy target.", details: "Routing confidence fell to 0.78 for premium incidents in the APAC region after a queue burst.", trace: "Trace ID: ERR-8871\nMinorSignalDrop: confidence score fell below 0.80 threshold\n  at AtlasRoutingAgent.evaluatePriority (runtime/atlas-routing.js:167)\n  at async routeMessage (runtime/atlas-routing.js:249)" },
+          { id: 4, timestamp: "2026-08-04 07:42", agent: "Ledger Contract Agent", errorType: "Critical", summary: "Contract diffing flagged a duplicate pricing band in an active renewal.", details: "A renewal draft duplicated a premium support line item, creating a mismatched total cost.", trace: "Trace ID: ERR-8750\nDuplicatePricingBandError: duplicate premium_support line item detected\n  at LedgerContractAgent.validatePricing (runtime/ledger-contract.js:128)\n  at async reviewRenewalDraft (runtime/ledger-contract.js:203)" },
+          { id: 5, timestamp: "2026-08-03 22:06", agent: "Beacon Support Agent", errorType: "Warning", summary: "Manual review queue exceeded the preferred overnight target.", details: "The overnight review queue reached 14 items after maintenance completed later than planned.", trace: "Trace ID: ERR-8614\nWarning: manual review backlog exceeded preferred queue length\n  at BeaconSupportAgent.enqueueManualReview (runtime/beacon-support.js:256)\n  at nightlyBatchClose (runtime/support-batch.js:71)" },
+          { id: 6, timestamp: "2026-08-03 20:51", agent: "Pulse Monitor Agent", errorType: "Resolved", summary: "Anomaly detection rule misclassified scheduled load tests as incidents.", details: "The sensitivity threshold was tuned and the false-positive stream stopped after deployment.", trace: "Trace ID: ERR-8522\nResolvedIncident: anomaly rule sensitivity lowered after scheduled load-test verification\n  at PulseMonitorAgent.applyThresholdPatch (runtime/pulse-monitor.js:355)\n  at async closeIncident (runtime/incidents.js:144)" },
         ],
         expandedAgents: new Set(),
         activeDropdown: null,
@@ -274,6 +278,8 @@
       function statusBadge(status) {
         const map = {
           Active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+          Inactive: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+          Failing: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
           Healthy: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
           Monitoring: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
           Review: "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
@@ -297,10 +303,13 @@
             const active = state.activeSection === item.key;
             return `
               <li>
-                <button type="button" data-nav="${item.key}" class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-medium transition ${active ? "bg-ink-950 text-white dark:bg-amber-300 dark:text-ink-950" : "text-slate-700 hover:bg-sand-100 dark:text-slate-200 dark:hover:bg-slate-900"}">
-                  <span>${item.label}</span>
+                <a href="#${item.key}" data-nav="${item.key}" aria-current="${active ? "page" : "false"}" class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-medium transition ${active ? "bg-ink-950 text-white dark:bg-amber-300 dark:text-ink-950" : "text-slate-700 hover:bg-sand-100 dark:text-slate-200 dark:hover:bg-slate-900"}">
+                  <span class="flex items-center gap-3">
+                    <span class="h-2.5 w-2.5 rounded-full ${active ? "bg-amber-300 dark:bg-ink-950" : "bg-stone-300 dark:bg-slate-700"}"></span>
+                    <span>${item.label}</span>
+                  </span>
                   <span class="text-xs uppercase tracking-[0.2em] ${active ? "text-white/70 dark:text-ink-950/70" : "text-slate-400"}">${String(navItems.findIndex((entry) => entry.key === item.key) + 1).padStart(2, "0")}</span>
-                </button>
+                </a>
               </li>
             `;
           })
@@ -308,68 +317,71 @@
       }
 
       function renderDashboard() {
-        const openErrors = state.errors.filter((entry) => entry.severity !== "Resolved").length;
         const dashboard = document.getElementById("section-dashboard");
         const metrics = [
-          { label: "Total users", value: state.users.length, tone: "from-slateblue-500/20 to-slateblue-500/5" },
-          { label: "Active agents", value: state.agents.length, tone: "from-emerald-500/20 to-emerald-500/5" },
-          { label: "Active contracts", value: state.contracts.length, tone: "from-amber-500/20 to-amber-500/5" },
-          { label: "Open errors", value: openErrors, tone: "from-rose-500/20 to-rose-500/5" },
+          {
+            label: "Revenue this month",
+            value: "$128,450",
+            tone: "from-emerald-500/20 to-emerald-500/5",
+            icon: "M12 3v18m9-9H3",
+            iconColor: "text-emerald-600 dark:text-emerald-300",
+          },
+          {
+            label: "Discount and coupon losses",
+            value: "$14,280",
+            tone: "from-amber-500/20 to-amber-500/5",
+            icon: "M4 7h16M7 12h10m-8 5h6",
+            iconColor: "text-amber-600 dark:text-amber-300",
+          },
+          {
+            label: "Active agents across clients",
+            value: "342",
+            tone: "from-slateblue-500/20 to-slateblue-500/5",
+            icon: "M17 20h5V4H2v16h5m10 0v-6H7v6m10 0H7",
+            iconColor: "text-slateblue-500 dark:text-cyan-300",
+          },
+          {
+            label: "Agents flagged as failing",
+            value: "9",
+            tone: "from-rose-500/20 to-rose-500/5",
+            icon: "M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z",
+            iconColor: "text-rose-600 dark:text-rose-300",
+          },
         ];
 
         dashboard.innerHTML = `
           <section aria-labelledby="dashboard-status">
             ${panelShell("Operations health", "Systems are stable overall, with one monitoring concern and one degraded agent requiring focused follow-up.", "Updated from live panel state")}
           </section>
-          <section aria-label="Metric summary" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section aria-label="Metric summary" class="grid gap-4 md:grid-cols-2">
             ${metrics
               .map(
                 (metric) => `
                   <article class="rounded-[2rem] border border-stone-200/80 bg-gradient-to-br ${metric.tone} bg-white/85 p-5 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
-                    <p class="text-sm text-slate-600 dark:text-slate-300">${metric.label}</p>
-                    <p class="mt-4 text-4xl font-semibold tracking-tight">${metric.value}</p>
-                    <p class="mt-3 text-xs uppercase tracking-[0.2em] text-slate-400">Operational metric</p>
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">${metric.label}</p>
+                        <p class="mt-4 text-4xl font-semibold tracking-tight">${metric.value}</p>
+                      </div>
+                      <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 dark:bg-slate-950/60">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="h-6 w-6 ${metric.iconColor}" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="${metric.icon}"></path>
+                        </svg>
+                      </span>
+                    </div>
+                    <p class="mt-3 text-xs uppercase tracking-[0.2em] text-slate-400">Hardcoded monthly platform metric</p>
                   </article>
                 `
               )
               .join("")}
           </section>
-          <section class="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
-            <article class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-xl font-semibold tracking-tight">Weekly activity</h3>
-                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Visual placeholder for throughput, incident volume, and contract reviews.</p>
-                </div>
-                <div class="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:border-slate-700">Placeholder</div>
+          <section aria-label="Weekly activity chart placeholder">
+            <div class="flex min-h-72 items-center justify-center rounded-[2rem] border-2 border-dashed border-stone-300/90 bg-white/70 px-6 py-12 text-center shadow-panel dark:border-slate-700 dark:bg-slate-900/75">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Weekly Activity Chart</p>
+                <p class="mt-3 text-sm text-slate-600 dark:text-slate-300">Placeholder for revenue, agent activity, and failure trends.</p>
               </div>
-              <div class="mt-8 flex h-72 items-end gap-3 rounded-[1.5rem] border border-dashed border-stone-300/90 bg-sand-50 px-4 pb-4 pt-10 dark:border-slate-700 dark:bg-slate-950/50">
-                ${["h-[48%]", "h-[72%]", "h-[64%]", "h-[90%]", "h-[58%]", "h-[76%]", "h-[84%]"]
-                  .map(
-                    (heightClass, index) => `
-                      <div class="flex flex-1 flex-col items-center gap-3">
-                        <div class="w-full ${heightClass} rounded-t-3xl bg-gradient-to-t from-ember-600 to-amber-300 dark:from-slateblue-500 dark:to-cyan-300"></div>
-                        <span class="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]}</span>
-                      </div>
-                    `
-                  )
-                  .join("")}
-              </div>
-            </article>
-            <article class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
-              <h3 class="text-xl font-semibold tracking-tight">Shift context</h3>
-              <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Open incidents remain concentrated in monitoring and contract validation. Routing capacity is steady, and user access changes are limited to a single suspended auditor account.</p>
-              <div class="mt-6 space-y-4">
-                <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
-                  <p class="text-sm font-semibold">Runtime health</p>
-                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">One degraded agent, one monitored agent, and four unresolved errors.</p>
-                </div>
-                <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
-                  <p class="text-sm font-semibold">Contract exposure</p>
-                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">One contract requires attention after a pricing anomaly in a renewal diff.</p>
-                </div>
-              </div>
-            </article>
+            </div>
           </section>
         `;
       }
@@ -384,7 +396,7 @@
                     ${headers.map((header) => `<th scope="col" class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">${header}</th>`).join("")}
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-stone-200 dark:divide-slate-800">
+                <tbody class="divide-y divide-stone-200 dark:divide-slate-800 [&_td]:align-top [&_td]:whitespace-normal [&_td]:break-words">
                   ${bodyRows}
                 </tbody>
               </table>
@@ -393,14 +405,16 @@
         `;
       }
 
-      function actionDropdown(id, items) {
+      function actionDropdown(id, items, options = {}) {
         const open = state.activeDropdown === id;
+        const triggerLabel = options.triggerLabel || "&#8942;";
+        const triggerClass = options.triggerClass || "inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 bg-white/90 text-xl leading-none text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300";
         return `
           <div class="relative inline-flex">
-            <button type="button" data-dropdown-trigger="${id}" class="rounded-full border border-stone-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300" aria-expanded="${open}">
-              Actions
+            <button type="button" data-dropdown-trigger="${id}" class="${triggerClass}" aria-expanded="${open}" aria-label="Open row actions">
+              ${triggerLabel}
             </button>
-            <div data-dropdown-menu="${id}" class="absolute right-0 top-12 z-10 min-w-44 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl ${open ? "block" : "hidden"} dark:border-slate-800 dark:bg-slate-950">
+            <div data-dropdown-menu="${id}" class="absolute right-0 top-12 z-10 min-w-44 max-w-[calc(100vw-2rem)] rounded-2xl border border-stone-200 bg-white p-2 shadow-xl ${open ? "block" : "hidden"} dark:border-slate-800 dark:bg-slate-950">
               ${items
                 .map(
                   (item) => `
@@ -420,18 +434,17 @@
           .map(
             (user) => `
               <tr>
-                <td class="px-5 py-4">
-                  <p class="font-medium">${user.name}</p>
-                  <p class="text-sm text-slate-500 dark:text-slate-400">${user.email}</p>
-                </td>
-                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.role}</td>
-                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.region}</td>
+                <td class="px-5 py-4 font-medium">${user.name}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.email}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.plan}</td>
                 <td class="px-5 py-4">${statusBadge(user.status)}</td>
-                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.lastSeen}</td>
                 <td class="px-5 py-4 text-right">${actionDropdown(`user-${user.id}`, [
                   { id: user.id, action: "view-user", label: "View detail" },
-                  { id: user.id, action: "message-user", label: "Notify owner" },
-                ])}</td>
+                  { id: user.id, action: "delete-user", label: "Delete" },
+                ], {
+                  triggerLabel: "&#8942;",
+                  triggerClass: "inline-flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 bg-white/90 text-xl leading-none text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300",
+                })}</td>
               </tr>
             `
           )
@@ -442,7 +455,7 @@
             ${panelShell("Administrator directory", "User lifecycle visibility across platform operations, support, security, and contract review teams.", "5 hardcoded operators")}
           </section>
           <section aria-label="User management table">
-            ${tableShell(["User", "Role", "Region", "Status", "Last active", "Actions"], rows)}
+            ${tableShell(["Name", "Email", "Plan", "Status", "Actions"], rows)}
           </section>
         `;
       }
@@ -462,12 +475,12 @@
                     <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Owned by ${agent.owner}</p>
                   </div>
                   <div class="flex items-center gap-3">
-                    <button type="button" data-agent-toggle="${agent.id}" class="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300" aria-expanded="${expanded}">
+                    <button type="button" data-agent-toggle="${agent.id}" class="rounded-full border border-stone-300 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300" aria-expanded="${expanded}">
                       ${expanded ? "Collapse skills" : "Expand skills"}
                     </button>
                     ${actionDropdown(`agent-${agent.id}`, [
                       { id: agent.id, action: "configure-agent", label: "Configure" },
-                      { id: agent.id, action: "view-agent", label: "View detail" },
+                      { id: agent.id, action: "delete-agent", label: "Delete" },
                     ])}
                   </div>
                 </div>
@@ -514,7 +527,7 @@
                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${skill.enabledAgents}</td>
                 <td class="px-5 py-4 text-right">${actionDropdown(`skill-${skill.id}`, [
                   { id: skill.id, action: "view-skill", label: "View detail" },
-                  { id: skill.id, action: "audit-skill", label: "Audit usage" },
+                  { id: skill.id, action: "delete-skill", label: "Delete" },
                 ])}</td>
               </tr>
             `
@@ -524,6 +537,11 @@
         document.getElementById("section-skills").innerHTML = `
           <section>
             ${panelShell("Skill catalog", "Skills are reusable behavior contracts that agents consume to perform specialized tasks consistently across the platform.", "4 featured skill entries")}
+          </section>
+          <section>
+            <div class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+              <p class="text-sm leading-6 text-slate-600 dark:text-slate-300">In AgentHub, a skill is a reusable capability package that can be attached to one or more agents to give them a specific operational behavior, such as routing, lookup, or escalation.</p>
+            </div>
           </section>
           <section aria-label="Skills table">
             ${tableShell(["Skill", "Description", "Enabled agents", "Actions"], rows)}
@@ -536,11 +554,12 @@
           .map(
             (contract) => `
               <tr>
-                <td class="px-5 py-4 font-medium">${contract.id}</td>
+                <td class="px-5 py-4 font-medium">${contract.client}</td>
                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.agent}</td>
-                <td class="px-5 py-4">${statusBadge(contract.status)}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.items.map((item) => item.skill).join(", ")}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.startDate}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.endDate}</td>
                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">$${contract.totalCost.toLocaleString()}</td>
-                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.updated}</td>
                 <td class="px-5 py-4 text-right">${actionDropdown(`contract-${contract.id}`, [
                   { id: contract.id, action: "view-contract", label: "View detail" },
                   { id: contract.id, action: "export-contract", label: "Export summary" },
@@ -555,7 +574,7 @@
             ${panelShell("Contract ledger", "Skill pricing is itemized per agent contract to make review and anomaly detection easier during renewals.", "4 active records")}
           </section>
           <section aria-label="Agent contracts table">
-            ${tableShell(["Contract", "Agent", "Status", "Total cost", "Updated", "Actions"], rows)}
+            ${tableShell(["Client", "Rented agent", "Contracted skills", "Start date", "End date", "Total paid", "Actions"], rows)}
           </section>
         `;
       }
@@ -566,8 +585,8 @@
             (entry) => `
               <tr>
                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.timestamp}</td>
-                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.source}</td>
-                <td class="px-5 py-4">${statusBadge(entry.severity)}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.agent}</td>
+                <td class="px-5 py-4">${statusBadge(entry.errorType)}</td>
                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.summary}</td>
                 <td class="px-5 py-4 text-right">${actionDropdown(`error-${entry.id}`, [
                   { id: entry.id, action: "view-error", label: "View detail" },
@@ -583,7 +602,7 @@
             ${panelShell("Incident queue", "Severity badges highlight the operational impact of each error so administrators can work from the riskiest item downward.", "6 hardcoded incidents")}
           </section>
           <section aria-label="Error log table">
-            ${tableShell(["Timestamp", "Source", "Severity", "Summary", "Actions"], rows)}
+            ${tableShell(["Timestamp", "Agent", "Error type", "Description", "Actions"], rows)}
           </section>
         `;
       }
@@ -633,8 +652,8 @@
         root.className = "fixed inset-0 z-50 flex items-center justify-center p-4";
         root.innerHTML = `
           <div data-modal-backdrop class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"></div>
-          <div class="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-stone-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-start justify-between gap-4">
+          <div class="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-stone-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900 md:p-6">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">${config.eyebrow || "Detail"}</p>
                 <h3 class="mt-2 text-2xl font-semibold tracking-tight">${config.title}</h3>
@@ -642,7 +661,7 @@
               <button type="button" data-close-modal class="rounded-full border border-stone-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300">Close</button>
             </div>
             <div class="mt-6">${config.body}</div>
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
               ${config.footer || '<button type="button" data-close-modal class="rounded-full bg-ink-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-ember-600 dark:bg-amber-300 dark:text-ink-950 dark:hover:bg-amber-200">Done</button>'}
             </div>
           </div>
@@ -678,11 +697,27 @@
           title: user.name,
           body: `
             <dl class="grid gap-4 md:grid-cols-2">
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Name</dt><dd class="mt-2 text-sm">${user.name}</dd></div>
               <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Email</dt><dd class="mt-2 text-sm">${user.email}</dd></div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Plan</dt><dd class="mt-2 text-sm">${user.plan}</dd></div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Status</dt><dd class="mt-2 text-sm">${user.status}</dd></div>
               <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Role</dt><dd class="mt-2 text-sm">${user.role}</dd></div>
               <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Region</dt><dd class="mt-2 text-sm">${user.region}</dd></div>
-              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Last active</dt><dd class="mt-2 text-sm">${user.lastSeen}</dd></div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800 md:col-span-2"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Last active</dt><dd class="mt-2 text-sm">${user.lastSeen}</dd></div>
             </dl>
+          `,
+        });
+      }
+
+      function openDeleteUserModal(id) {
+        const user = state.users.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Delete user",
+          title: `Delete ${user.name}?`,
+          body: `
+            <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+              <p class="text-sm leading-6 text-slate-700 dark:text-slate-200">This demo uses hardcoded records, so deletion is disabled. The action is shown here to match the operational workflow.</p>
+            </div>
           `,
         });
       }
@@ -714,14 +749,28 @@
           title: `${agent.name} prompt`,
           body: `
             <label for="agent-prompt" class="text-sm font-medium text-slate-700 dark:text-slate-200">Editable system prompt</label>
-            <textarea id="agent-prompt" data-agent-prompt="${agent.id}" rows="8" class="mt-3 w-full rounded-[1.5rem] border border-stone-300 bg-sand-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-ember-500 dark:border-slate-700 dark:bg-slate-950/70 dark:text-slate-100">${agent.prompt}</textarea>
+            <textarea id="agent-prompt" data-agent-prompt="${agent.id}" rows="8" placeholder="${agent.prompt}" class="mt-3 w-full rounded-[1.5rem] border border-stone-300 bg-sand-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-ember-500 dark:border-slate-700 dark:bg-slate-950/70 dark:text-slate-100">${agent.prompt}</textarea>
           `,
           footer: `<button type="button" data-save-agent="${agent.id}" class="rounded-full bg-ink-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-ember-600 dark:bg-amber-300 dark:text-ink-950 dark:hover:bg-amber-200">Save prompt</button>`,
         });
       }
 
+      function openDeleteAgentModal(id) {
+        const agent = state.agents.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Delete agent",
+          title: `Delete ${agent.name}?`,
+          body: `
+            <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+              <p class="text-sm leading-6 text-slate-700 dark:text-slate-200">This prototype keeps agent records hardcoded, so delete is shown as an operational action without mutating the dataset.</p>
+            </div>
+          `,
+        });
+      }
+
       function openSkillModal(id) {
         const skill = state.skills.find((entry) => entry.id === Number(id));
+        const relatedAgents = state.agents.filter((agent) => agent.skills.includes(skill.name));
         openModal({
           eyebrow: "Skill detail",
           title: skill.name,
@@ -735,6 +784,25 @@
                 <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Category</p><p class="mt-3 text-sm">${skill.category}</p></div>
                 <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Enabled agents</p><p class="mt-3 text-sm">${skill.enabledAgents}</p></div>
               </div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Agents using this skill</p>
+                <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                  ${relatedAgents.map((agent) => `<li>${agent.name}</li>`).join("")}
+                </ul>
+              </div>
+            </div>
+          `,
+        });
+      }
+
+      function openDeleteSkillModal(id) {
+        const skill = state.skills.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Delete skill",
+          title: `Delete ${skill.name}?`,
+          body: `
+            <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+              <p class="text-sm leading-6 text-slate-700 dark:text-slate-200">This interface uses hardcoded data, so the delete option is displayed for workflow completeness without removing the record.</p>
             </div>
           `,
         });
@@ -748,8 +816,10 @@
           body: `
             <div class="space-y-4">
               <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-sm text-slate-600 dark:text-slate-300">Client: <span class="font-medium text-slate-900 dark:text-white">${contract.client}</span></p>
                 <p class="text-sm text-slate-600 dark:text-slate-300">Agent: <span class="font-medium text-slate-900 dark:text-white">${contract.agent}</span></p>
-                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Updated: ${contract.updated}</p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Start date: ${contract.startDate}</p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">End date: ${contract.endDate}</p>
               </div>
               <div class="overflow-hidden rounded-[1.5rem] border border-stone-200 dark:border-slate-800">
                 <table class="min-w-full divide-y divide-stone-200 dark:divide-slate-800">
@@ -788,11 +858,11 @@
         const error = state.errors.find((entry) => entry.id === Number(id));
         openModal({
           eyebrow: "Error detail",
-          title: error.source,
+          title: error.agent,
           body: `
             <div class="space-y-4">
               <div class="flex flex-wrap items-center gap-3">
-                ${statusBadge(error.severity)}
+                ${statusBadge(error.errorType)}
                 <span class="text-sm text-slate-500 dark:text-slate-400">${error.timestamp}</span>
               </div>
               <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
@@ -802,6 +872,10 @@
               <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
                 <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Investigation notes</p>
                 <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">${error.details}</p>
+              </div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Full error trace</p>
+                <pre class="mt-3 overflow-x-auto whitespace-pre-wrap break-words text-sm leading-6 text-slate-600 dark:text-slate-300">${error.trace}</pre>
               </div>
             </div>
           `,
@@ -813,15 +887,16 @@
         if (!error) {
           return;
         }
-        error.severity = "Resolved";
+        error.errorType = "Resolved";
         closeDropdowns();
         renderSections();
       }
 
       document.addEventListener("click", (event) => {
-        const navButton = event.target.closest("[data-nav]");
-        if (navButton) {
-          setSection(navButton.dataset.nav);
+        const navLink = event.target.closest("[data-nav]");
+        if (navLink) {
+          event.preventDefault();
+          setSection(navLink.dataset.nav);
           return;
         }
 
@@ -843,11 +918,11 @@
           closeDropdowns();
           renderSections();
           if (action === "view-user") openUserModal(id);
-          if (action === "message-user") openUserModal(id);
+          if (action === "delete-user") openDeleteUserModal(id);
           if (action === "configure-agent") openAgentConfigureModal(id);
-          if (action === "view-agent") openAgentModal(id);
+          if (action === "delete-agent") openDeleteAgentModal(id);
           if (action === "view-skill") openSkillModal(id);
-          if (action === "audit-skill") openSkillModal(id);
+          if (action === "delete-skill") openDeleteSkillModal(id);
           if (action === "view-contract") openContractModal(id);
           if (action === "export-contract") openContractModal(id);
           if (action === "view-error") openErrorModal(id);
