@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgentHub Admin Panel</title>
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              ink: {
+                950: "#111827",
+              },
+              sand: {
+                50: "#f8f5ee",
+                100: "#efe7da",
+              },
+              ember: {
+                500: "#c75b39",
+                600: "#b34b2c",
+              },
+              moss: {
+                500: "#2f6f57",
+              },
+              slateblue: {
+                500: "#315b8f",
+              },
+            },
+            boxShadow: {
+              panel: "0 20px 45px -25px rgba(17, 24, 39, 0.35)",
+            },
+          },
+        },
+      };
+      (function () {
+        var storedTheme = localStorage.getItem("agenthub-theme");
+        if (storedTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="h-full bg-sand-50 text-ink-950 transition-colors duration-300 dark:bg-ink-950 dark:text-slate-100">
+    <div class="min-h-full bg-[radial-gradient(circle_at_top,_rgba(199,91,57,0.14),_transparent_28%),linear-gradient(180deg,_rgba(255,255,255,0.8),_rgba(248,245,238,1))] dark:bg-[radial-gradient(circle_at_top,_rgba(49,91,143,0.28),_transparent_24%),linear-gradient(180deg,_rgba(17,24,39,1),_rgba(10,15,27,1))]">
+      <div class="mx-auto flex min-h-screen max-w-[1600px] flex-col md:flex-row">
+        <aside class="border-b border-stone-300/80 bg-white/80 backdrop-blur md:sticky md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r dark:border-slate-800 dark:bg-slate-950/75">
+          <div class="flex h-full flex-col px-5 py-6">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.35em] text-ember-600 dark:text-amber-300">AgentHub</p>
+              <h1 class="mt-3 text-2xl font-semibold tracking-tight">Admin Control</h1>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Internal operations dashboard for agents, users, contracts, and incidents.</p>
+            </div>
+            <nav class="mt-8" aria-label="Primary">
+              <ul id="sidebar-nav" class="space-y-2"></ul>
+            </nav>
+            <div class="mt-auto rounded-3xl border border-stone-200 bg-sand-100/90 p-4 dark:border-slate-800 dark:bg-slate-900">
+              <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Operational Focus</p>
+              <p class="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">Monitor skill usage, review contract costs, and reduce unresolved runtime failures before the next deployment window.</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="flex-1">
+          <header class="sticky top-0 z-20 border-b border-stone-300/70 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80">
+            <div class="flex flex-col gap-4 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-8">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Operations Console</p>
+                <h2 id="page-title" class="mt-2 text-3xl font-semibold tracking-tight">Dashboard</h2>
+                <p id="page-context" class="mt-1 text-sm text-slate-600 dark:text-slate-300">Live overview of platform health and workload distribution.</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="hidden rounded-full border border-stone-300 px-3 py-2 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300 md:flex">
+                  Status: nominal throughput
+                </div>
+                <button id="theme-toggle" type="button" class="inline-flex items-center gap-3 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-amber-300 dark:hover:text-amber-300" aria-pressed="false">
+                  <span id="theme-toggle-label">Switch to dark mode</span>
+                  <span class="inline-flex h-6 w-11 items-center rounded-full bg-stone-200 p-1 transition dark:bg-slate-700">
+                    <span id="theme-toggle-knob" class="h-4 w-4 rounded-full bg-ember-500 transition-transform dark:translate-x-5 dark:bg-amber-300"></span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <main class="px-5 py-6 md:px-8 md:py-8">
+            <section id="section-dashboard" data-section class="space-y-6"></section>
+            <section id="section-users" data-section class="hidden space-y-6"></section>
+            <section id="section-agents" data-section class="hidden space-y-6"></section>
+            <section id="section-skills" data-section class="hidden space-y-6"></section>
+            <section id="section-contracts" data-section class="hidden space-y-6"></section>
+            <section id="section-errors" data-section class="hidden space-y-6"></section>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-root" class="fixed inset-0 z-50 hidden items-center justify-center p-4"></div>
+
+    <script>
+      const state = {
+        activeSection: localStorage.getItem("agenthub-section") || "dashboard",
+        theme: localStorage.getItem("agenthub-theme") || (document.documentElement.classList.contains("dark") ? "dark" : "light"),
+        users: [
+          { id: 1, name: "Nora Fields", email: "nora.fields@agenthub.internal", role: "Platform Admin", status: "Active", region: "US-East", lastSeen: "2 minutes ago" },
+          { id: 2, name: "Daniel Wu", email: "daniel.wu@agenthub.internal", role: "Security Analyst", status: "Active", region: "US-West", lastSeen: "12 minutes ago" },
+          { id: 3, name: "Amira Hassan", email: "amira.hassan@agenthub.internal", role: "Contract Ops", status: "Review", region: "EMEA", lastSeen: "45 minutes ago" },
+          { id: 4, name: "Sofia Alvarez", email: "sofia.alvarez@agenthub.internal", role: "Support Lead", status: "Active", region: "LATAM", lastSeen: "1 hour ago" },
+          { id: 5, name: "Marcus Reed", email: "marcus.reed@agenthub.internal", role: "Agent Auditor", status: "Suspended", region: "US-Central", lastSeen: "Yesterday" },
+        ],
+        agents: [
+          {
+            id: 1,
+            name: "Atlas Routing Agent",
+            status: "Healthy",
+            owner: "Platform Ops",
+            prompt: "Route incoming requests to the correct execution path while keeping latency below target.",
+            skills: ["Intent Classification", "Traffic Balancing", "Priority Escalation"],
+          },
+          {
+            id: 2,
+            name: "Beacon Support Agent",
+            status: "Monitoring",
+            owner: "Customer Support",
+            prompt: "Diagnose customer issues, suggest recovery actions, and escalate incidents that require human review.",
+            skills: ["Ticket Summarization", "Knowledge Lookup", "Incident Escalation"],
+          },
+          {
+            id: 3,
+            name: "Ledger Contract Agent",
+            status: "Healthy",
+            owner: "Contract Ops",
+            prompt: "Validate skill contract pricing, flag anomalies, and prepare approval summaries for administrators.",
+            skills: ["Cost Validation", "Contract Diffing", "Approval Drafting"],
+          },
+          {
+            id: 4,
+            name: "Pulse Monitor Agent",
+            status: "Degraded",
+            owner: "Reliability",
+            prompt: "Aggregate runtime signals, prioritize error spikes, and draft the first incident response recommendation.",
+            skills: ["Incident Escalation", "Telemetry Parsing", "Anomaly Detection"],
+          },
+        ],
+        skills: [
+          { id: 1, name: "Intent Classification", description: "Assigns incoming work to the correct operational queue.", enabledAgents: 1, category: "Routing" },
+          { id: 2, name: "Incident Escalation", description: "Raises incidents when confidence drops or failure thresholds are crossed.", enabledAgents: 2, category: "Reliability" },
+          { id: 3, name: "Cost Validation", description: "Checks contract line items against approved pricing bands.", enabledAgents: 1, category: "Finance" },
+          { id: 4, name: "Knowledge Lookup", description: "Retrieves internal runbook steps for support workflows.", enabledAgents: 1, category: "Support" },
+          { id: 5, name: "Traffic Balancing", description: "Distributes workload across available agent pools.", enabledAgents: 1, category: "Routing" },
+          { id: 6, name: "Contract Diffing", description: "Highlights changes between contract revisions for rapid review.", enabledAgents: 1, category: "Finance" },
+          { id: 7, name: "Approval Drafting", description: "Generates approval notes from validated pricing signals.", enabledAgents: 1, category: "Finance" },
+          { id: 8, name: "Ticket Summarization", description: "Condenses support threads into action-oriented summaries.", enabledAgents: 1, category: "Support" },
+          { id: 9, name: "Telemetry Parsing", description: "Normalizes runtime logs into comparable operational events.", enabledAgents: 1, category: "Reliability" },
+          { id: 10, name: "Anomaly Detection", description: "Flags unusual traffic or error patterns for investigation.", enabledAgents: 1, category: "Reliability" },
+          { id: 11, name: "Priority Escalation", description: "Promotes time-sensitive workload for immediate response.", enabledAgents: 1, category: "Routing" },
+        ],
+        contracts: [
+          {
+            id: "CTR-1001",
+            agent: "Atlas Routing Agent",
+            status: "Active",
+            totalCost: 1800,
+            updated: "2026-08-02",
+            items: [
+              { skill: "Intent Classification", price: 700 },
+              { skill: "Traffic Balancing", price: 650 },
+              { skill: "Priority Escalation", price: 450 },
+            ],
+          },
+          {
+            id: "CTR-1002",
+            agent: "Beacon Support Agent",
+            status: "Review",
+            totalCost: 1620,
+            updated: "2026-08-01",
+            items: [
+              { skill: "Ticket Summarization", price: 540 },
+              { skill: "Knowledge Lookup", price: 510 },
+              { skill: "Incident Escalation", price: 570 },
+            ],
+          },
+          {
+            id: "CTR-1003",
+            agent: "Ledger Contract Agent",
+            status: "Active",
+            totalCost: 1940,
+            updated: "2026-08-03",
+            items: [
+              { skill: "Cost Validation", price: 720 },
+              { skill: "Contract Diffing", price: 610 },
+              { skill: "Approval Drafting", price: 610 },
+            ],
+          },
+          {
+            id: "CTR-1004",
+            agent: "Pulse Monitor Agent",
+            status: "Attention",
+            totalCost: 1710,
+            updated: "2026-08-04",
+            items: [
+              { skill: "Incident Escalation", price: 560 },
+              { skill: "Telemetry Parsing", price: 540 },
+              { skill: "Anomaly Detection", price: 610 },
+            ],
+          },
+        ],
+        errors: [
+          { id: 1, timestamp: "2026-08-04 09:12", source: "Pulse Monitor Agent", severity: "Critical", summary: "Telemetry parsing backlog exceeded the threshold for three consecutive checks.", details: "The telemetry parser queue remained over 8,000 events for 15 minutes, increasing incident triage latency." },
+          { id: 2, timestamp: "2026-08-04 08:47", source: "Beacon Support Agent", severity: "High", summary: "Knowledge lookup returned stale runbook version during escalation workflow.", details: "A cached document version omitted the latest escalation contact rotation for tier-two support." },
+          { id: 3, timestamp: "2026-08-04 08:15", source: "Atlas Routing Agent", severity: "Medium", summary: "Priority escalation confidence dipped below the policy target.", details: "Routing confidence fell to 0.78 for premium incidents in the APAC region after a queue burst." },
+          { id: 4, timestamp: "2026-08-04 07:42", source: "Ledger Contract Agent", severity: "High", summary: "Contract diffing flagged a duplicate pricing band in an active renewal.", details: "A renewal draft duplicated a premium support line item, creating a mismatched total cost." },
+          { id: 5, timestamp: "2026-08-03 22:06", source: "Platform Ops", severity: "Low", summary: "Manual review queue exceeded the preferred overnight target.", details: "The overnight review queue reached 14 items after maintenance completed later than planned." },
+          { id: 6, timestamp: "2026-08-03 20:51", source: "Pulse Monitor Agent", severity: "Resolved", summary: "Anomaly detection rule misclassified scheduled load tests as incidents.", details: "The sensitivity threshold was tuned and the false-positive stream stopped after deployment." },
+        ],
+        expandedAgents: new Set(),
+        activeDropdown: null,
+        activeModal: null,
+      };
+
+      const sectionMeta = {
+        dashboard: {
+          label: "Dashboard",
+          context: "Live overview of platform health and workload distribution.",
+        },
+        users: {
+          label: "User Management",
+          context: "Track administrator access, regions, and workflow ownership.",
+        },
+        agents: {
+          label: "Agent Management",
+          context: "Review agent status, owned skills, and editable runtime prompts.",
+        },
+        skills: {
+          label: "Skills",
+          context: "Inspect reusable skill contracts and their deployment footprint.",
+        },
+        contracts: {
+          label: "Agent Contracts",
+          context: "Compare costed skill bundles and contract lifecycle status.",
+        },
+        errors: {
+          label: "Error Log",
+          context: "Investigate runtime issues and resolve operational alerts.",
+        },
+      };
+
+      const navItems = [
+        { key: "dashboard", label: "Dashboard" },
+        { key: "users", label: "User Management" },
+        { key: "agents", label: "Agent Management" },
+        { key: "skills", label: "Skills" },
+        { key: "contracts", label: "Agent Contracts" },
+        { key: "errors", label: "Error Log" },
+      ];
+
+      function panelShell(title, body, actionText) {
+        return `
+          <div class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h3 class="text-xl font-semibold tracking-tight">${title}</h3>
+                <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">${body}</div>
+              </div>
+              ${actionText ? `<div class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">${actionText}</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      function statusBadge(status) {
+        const map = {
+          Active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+          Healthy: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+          Monitoring: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+          Review: "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
+          Suspended: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+          Degraded: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+          Attention: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+          Resolved: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+          Critical: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+          High: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
+          Medium: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+          Low: "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
+        };
+
+        return `<span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold ${map[status] || "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200"}">${status}</span>`;
+      }
+
+      function renderSidebar() {
+        const nav = document.getElementById("sidebar-nav");
+        nav.innerHTML = navItems
+          .map((item) => {
+            const active = state.activeSection === item.key;
+            return `
+              <li>
+                <button type="button" data-nav="${item.key}" class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-medium transition ${active ? "bg-ink-950 text-white dark:bg-amber-300 dark:text-ink-950" : "text-slate-700 hover:bg-sand-100 dark:text-slate-200 dark:hover:bg-slate-900"}">
+                  <span>${item.label}</span>
+                  <span class="text-xs uppercase tracking-[0.2em] ${active ? "text-white/70 dark:text-ink-950/70" : "text-slate-400"}">${String(navItems.findIndex((entry) => entry.key === item.key) + 1).padStart(2, "0")}</span>
+                </button>
+              </li>
+            `;
+          })
+          .join("");
+      }
+
+      function renderDashboard() {
+        const openErrors = state.errors.filter((entry) => entry.severity !== "Resolved").length;
+        const dashboard = document.getElementById("section-dashboard");
+        const metrics = [
+          { label: "Total users", value: state.users.length, tone: "from-slateblue-500/20 to-slateblue-500/5" },
+          { label: "Active agents", value: state.agents.length, tone: "from-emerald-500/20 to-emerald-500/5" },
+          { label: "Active contracts", value: state.contracts.length, tone: "from-amber-500/20 to-amber-500/5" },
+          { label: "Open errors", value: openErrors, tone: "from-rose-500/20 to-rose-500/5" },
+        ];
+
+        dashboard.innerHTML = `
+          <section aria-labelledby="dashboard-status">
+            ${panelShell("Operations health", "Systems are stable overall, with one monitoring concern and one degraded agent requiring focused follow-up.", "Updated from live panel state")}
+          </section>
+          <section aria-label="Metric summary" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            ${metrics
+              .map(
+                (metric) => `
+                  <article class="rounded-[2rem] border border-stone-200/80 bg-gradient-to-br ${metric.tone} bg-white/85 p-5 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+                    <p class="text-sm text-slate-600 dark:text-slate-300">${metric.label}</p>
+                    <p class="mt-4 text-4xl font-semibold tracking-tight">${metric.value}</p>
+                    <p class="mt-3 text-xs uppercase tracking-[0.2em] text-slate-400">Operational metric</p>
+                  </article>
+                `
+              )
+              .join("")}
+          </section>
+          <section class="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+            <article class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-xl font-semibold tracking-tight">Weekly activity</h3>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Visual placeholder for throughput, incident volume, and contract reviews.</p>
+                </div>
+                <div class="rounded-full border border-stone-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:border-slate-700">Placeholder</div>
+              </div>
+              <div class="mt-8 flex h-72 items-end gap-3 rounded-[1.5rem] border border-dashed border-stone-300/90 bg-sand-50 px-4 pb-4 pt-10 dark:border-slate-700 dark:bg-slate-950/50">
+                ${["h-[48%]", "h-[72%]", "h-[64%]", "h-[90%]", "h-[58%]", "h-[76%]", "h-[84%]"]
+                  .map(
+                    (heightClass, index) => `
+                      <div class="flex flex-1 flex-col items-center gap-3">
+                        <div class="w-full ${heightClass} rounded-t-3xl bg-gradient-to-t from-ember-600 to-amber-300 dark:from-slateblue-500 dark:to-cyan-300"></div>
+                        <span class="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]}</span>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </article>
+            <article class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+              <h3 class="text-xl font-semibold tracking-tight">Shift context</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Open incidents remain concentrated in monitoring and contract validation. Routing capacity is steady, and user access changes are limited to a single suspended auditor account.</p>
+              <div class="mt-6 space-y-4">
+                <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                  <p class="text-sm font-semibold">Runtime health</p>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">One degraded agent, one monitored agent, and four unresolved errors.</p>
+                </div>
+                <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                  <p class="text-sm font-semibold">Contract exposure</p>
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">One contract requires attention after a pricing anomaly in a renewal diff.</p>
+                </div>
+              </div>
+            </article>
+          </section>
+        `;
+      }
+
+      function tableShell(headers, bodyRows) {
+        return `
+          <div class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white/85 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-stone-200 dark:divide-slate-800">
+                <thead class="bg-sand-100/80 dark:bg-slate-950/60">
+                  <tr>
+                    ${headers.map((header) => `<th scope="col" class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">${header}</th>`).join("")}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-200 dark:divide-slate-800">
+                  ${bodyRows}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      function actionDropdown(id, items) {
+        const open = state.activeDropdown === id;
+        return `
+          <div class="relative inline-flex">
+            <button type="button" data-dropdown-trigger="${id}" class="rounded-full border border-stone-300 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300" aria-expanded="${open}">
+              Actions
+            </button>
+            <div data-dropdown-menu="${id}" class="absolute right-0 top-12 z-10 min-w-44 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl ${open ? "block" : "hidden"} dark:border-slate-800 dark:bg-slate-950">
+              ${items
+                .map(
+                  (item) => `
+                    <button type="button" data-action="${item.action}" data-id="${item.id}" class="flex w-full rounded-xl px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-sand-100 dark:text-slate-200 dark:hover:bg-slate-900">
+                      ${item.label}
+                    </button>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      function renderUsers() {
+        const rows = state.users
+          .map(
+            (user) => `
+              <tr>
+                <td class="px-5 py-4">
+                  <p class="font-medium">${user.name}</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">${user.email}</p>
+                </td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.role}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.region}</td>
+                <td class="px-5 py-4">${statusBadge(user.status)}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${user.lastSeen}</td>
+                <td class="px-5 py-4 text-right">${actionDropdown(`user-${user.id}`, [
+                  { id: user.id, action: "view-user", label: "View detail" },
+                  { id: user.id, action: "message-user", label: "Notify owner" },
+                ])}</td>
+              </tr>
+            `
+          )
+          .join("");
+
+        document.getElementById("section-users").innerHTML = `
+          <section>
+            ${panelShell("Administrator directory", "User lifecycle visibility across platform operations, support, security, and contract review teams.", "5 hardcoded operators")}
+          </section>
+          <section aria-label="User management table">
+            ${tableShell(["User", "Role", "Region", "Status", "Last active", "Actions"], rows)}
+          </section>
+        `;
+      }
+
+      function renderAgents() {
+        const cards = state.agents
+          .map((agent) => {
+            const expanded = state.expandedAgents.has(agent.id);
+            return `
+              <article class="rounded-[2rem] border border-stone-200/80 bg-white/85 p-6 shadow-panel dark:border-slate-800 dark:bg-slate-900/85">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <div class="flex flex-wrap items-center gap-3">
+                      <h3 class="text-xl font-semibold tracking-tight">${agent.name}</h3>
+                      ${statusBadge(agent.status)}
+                    </div>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Owned by ${agent.owner}</p>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <button type="button" data-agent-toggle="${agent.id}" class="rounded-full border border-stone-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300" aria-expanded="${expanded}">
+                      ${expanded ? "Collapse skills" : "Expand skills"}
+                    </button>
+                    ${actionDropdown(`agent-${agent.id}`, [
+                      { id: agent.id, action: "configure-agent", label: "Configure" },
+                      { id: agent.id, action: "view-agent", label: "View detail" },
+                    ])}
+                  </div>
+                </div>
+                <div class="mt-5 grid overflow-hidden transition-all duration-300 ease-out ${expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-70"}">
+                  <div class="min-h-0">
+                    <div class="rounded-[1.5rem] border border-stone-200 bg-sand-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+                      <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Bound skills</p>
+                      <ul class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        ${agent.skills
+                          .map(
+                            (skill) => `
+                              <li class="rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-medium dark:border-slate-800 dark:bg-slate-900">${skill}</li>
+                            `
+                          )
+                          .join("")}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+
+        document.getElementById("section-agents").innerHTML = `
+          <section>
+            ${panelShell("Agent fleet", "Each agent starts with a collapsed skill bundle and can be configured through a dedicated prompt editor.", "4 hardcoded agents")}
+          </section>
+          <section class="grid gap-5">${cards}</section>
+        `;
+      }
+
+      function renderSkills() {
+        const rows = state.skills
+          .slice(0, 4)
+          .map(
+            (skill) => `
+              <tr>
+                <td class="px-5 py-4">
+                  <p class="font-medium">${skill.name}</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">${skill.category}</p>
+                </td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${skill.description}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${skill.enabledAgents}</td>
+                <td class="px-5 py-4 text-right">${actionDropdown(`skill-${skill.id}`, [
+                  { id: skill.id, action: "view-skill", label: "View detail" },
+                  { id: skill.id, action: "audit-skill", label: "Audit usage" },
+                ])}</td>
+              </tr>
+            `
+          )
+          .join("");
+
+        document.getElementById("section-skills").innerHTML = `
+          <section>
+            ${panelShell("Skill catalog", "Skills are reusable behavior contracts that agents consume to perform specialized tasks consistently across the platform.", "4 featured skill entries")}
+          </section>
+          <section aria-label="Skills table">
+            ${tableShell(["Skill", "Description", "Enabled agents", "Actions"], rows)}
+          </section>
+        `;
+      }
+
+      function renderContracts() {
+        const rows = state.contracts
+          .map(
+            (contract) => `
+              <tr>
+                <td class="px-5 py-4 font-medium">${contract.id}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.agent}</td>
+                <td class="px-5 py-4">${statusBadge(contract.status)}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">$${contract.totalCost.toLocaleString()}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${contract.updated}</td>
+                <td class="px-5 py-4 text-right">${actionDropdown(`contract-${contract.id}`, [
+                  { id: contract.id, action: "view-contract", label: "View detail" },
+                  { id: contract.id, action: "export-contract", label: "Export summary" },
+                ])}</td>
+              </tr>
+            `
+          )
+          .join("");
+
+        document.getElementById("section-contracts").innerHTML = `
+          <section>
+            ${panelShell("Contract ledger", "Skill pricing is itemized per agent contract to make review and anomaly detection easier during renewals.", "4 active records")}
+          </section>
+          <section aria-label="Agent contracts table">
+            ${tableShell(["Contract", "Agent", "Status", "Total cost", "Updated", "Actions"], rows)}
+          </section>
+        `;
+      }
+
+      function renderErrors() {
+        const rows = state.errors
+          .map(
+            (entry) => `
+              <tr>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.timestamp}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.source}</td>
+                <td class="px-5 py-4">${statusBadge(entry.severity)}</td>
+                <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">${entry.summary}</td>
+                <td class="px-5 py-4 text-right">${actionDropdown(`error-${entry.id}`, [
+                  { id: entry.id, action: "view-error", label: "View detail" },
+                  { id: entry.id, action: "resolve-error", label: "Mark as resolved" },
+                ])}</td>
+              </tr>
+            `
+          )
+          .join("");
+
+        document.getElementById("section-errors").innerHTML = `
+          <section>
+            ${panelShell("Incident queue", "Severity badges highlight the operational impact of each error so administrators can work from the riskiest item downward.", "6 hardcoded incidents")}
+          </section>
+          <section aria-label="Error log table">
+            ${tableShell(["Timestamp", "Source", "Severity", "Summary", "Actions"], rows)}
+          </section>
+        `;
+      }
+
+      function renderSections() {
+        renderDashboard();
+        renderUsers();
+        renderAgents();
+        renderSkills();
+        renderContracts();
+        renderErrors();
+
+        document.querySelectorAll("[data-section]").forEach((section) => {
+          section.classList.toggle("hidden", section.id !== `section-${state.activeSection}`);
+        });
+
+        const meta = sectionMeta[state.activeSection];
+        document.getElementById("page-title").textContent = meta.label;
+        document.getElementById("page-context").textContent = meta.context;
+      }
+
+      function renderApp() {
+        renderSidebar();
+        renderSections();
+        syncThemeControls();
+      }
+
+      function syncThemeControls() {
+        const isDark = state.theme === "dark";
+        document.documentElement.classList.toggle("dark", isDark);
+        const label = document.getElementById("theme-toggle-label");
+        const button = document.getElementById("theme-toggle");
+        label.textContent = isDark ? "Switch to light mode" : "Switch to dark mode";
+        button.setAttribute("aria-pressed", String(isDark));
+      }
+
+      function setSection(key) {
+        state.activeSection = key;
+        localStorage.setItem("agenthub-section", key);
+        closeDropdowns();
+        renderApp();
+      }
+
+      function openModal(config) {
+        state.activeModal = config;
+        const root = document.getElementById("modal-root");
+        root.className = "fixed inset-0 z-50 flex items-center justify-center p-4";
+        root.innerHTML = `
+          <div data-modal-backdrop class="absolute inset-0 bg-slate-950/55 backdrop-blur-sm"></div>
+          <div class="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] border border-stone-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">${config.eyebrow || "Detail"}</p>
+                <h3 class="mt-2 text-2xl font-semibold tracking-tight">${config.title}</h3>
+              </div>
+              <button type="button" data-close-modal class="rounded-full border border-stone-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-ember-500 hover:text-ember-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-amber-300 dark:hover:text-amber-300">Close</button>
+            </div>
+            <div class="mt-6">${config.body}</div>
+            <div class="mt-6 flex justify-end gap-3">
+              ${config.footer || '<button type="button" data-close-modal class="rounded-full bg-ink-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-ember-600 dark:bg-amber-300 dark:text-ink-950 dark:hover:bg-amber-200">Done</button>'}
+            </div>
+          </div>
+        `;
+      }
+
+      function closeModal() {
+        state.activeModal = null;
+        const root = document.getElementById("modal-root");
+        root.className = "fixed inset-0 z-50 hidden items-center justify-center p-4";
+        root.innerHTML = "";
+      }
+
+      function closeDropdowns() {
+        state.activeDropdown = null;
+      }
+
+      function toggleDropdown(id) {
+        state.activeDropdown = state.activeDropdown === id ? null : id;
+        renderSections();
+      }
+
+      function toggleTheme() {
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        localStorage.setItem("agenthub-theme", state.theme);
+        syncThemeControls();
+      }
+
+      function openUserModal(id) {
+        const user = state.users.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "User detail",
+          title: user.name,
+          body: `
+            <dl class="grid gap-4 md:grid-cols-2">
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Email</dt><dd class="mt-2 text-sm">${user.email}</dd></div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Role</dt><dd class="mt-2 text-sm">${user.role}</dd></div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Region</dt><dd class="mt-2 text-sm">${user.region}</dd></div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><dt class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Last active</dt><dd class="mt-2 text-sm">${user.lastSeen}</dd></div>
+            </dl>
+          `,
+        });
+      }
+
+      function openAgentModal(id) {
+        const agent = state.agents.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Agent overview",
+          title: agent.name,
+          body: `
+            <div class="space-y-4">
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Status</p>
+                <div class="mt-3">${statusBadge(agent.status)}</div>
+              </div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Current prompt</p>
+                <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">${agent.prompt}</p>
+              </div>
+            </div>
+          `,
+        });
+      }
+
+      function openAgentConfigureModal(id) {
+        const agent = state.agents.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Configure agent",
+          title: `${agent.name} prompt`,
+          body: `
+            <label for="agent-prompt" class="text-sm font-medium text-slate-700 dark:text-slate-200">Editable system prompt</label>
+            <textarea id="agent-prompt" data-agent-prompt="${agent.id}" rows="8" class="mt-3 w-full rounded-[1.5rem] border border-stone-300 bg-sand-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-ember-500 dark:border-slate-700 dark:bg-slate-950/70 dark:text-slate-100">${agent.prompt}</textarea>
+          `,
+          footer: `<button type="button" data-save-agent="${agent.id}" class="rounded-full bg-ink-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-ember-600 dark:bg-amber-300 dark:text-ink-950 dark:hover:bg-amber-200">Save prompt</button>`,
+        });
+      }
+
+      function openSkillModal(id) {
+        const skill = state.skills.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Skill detail",
+          title: skill.name,
+          body: `
+            <div class="space-y-4">
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Description</p>
+                <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">${skill.description}</p>
+              </div>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Category</p><p class="mt-3 text-sm">${skill.category}</p></div>
+                <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800"><p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Enabled agents</p><p class="mt-3 text-sm">${skill.enabledAgents}</p></div>
+              </div>
+            </div>
+          `,
+        });
+      }
+
+      function openContractModal(id) {
+        const contract = state.contracts.find((entry) => entry.id === id);
+        openModal({
+          eyebrow: "Contract detail",
+          title: `${contract.id} pricing breakdown`,
+          body: `
+            <div class="space-y-4">
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-sm text-slate-600 dark:text-slate-300">Agent: <span class="font-medium text-slate-900 dark:text-white">${contract.agent}</span></p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Updated: ${contract.updated}</p>
+              </div>
+              <div class="overflow-hidden rounded-[1.5rem] border border-stone-200 dark:border-slate-800">
+                <table class="min-w-full divide-y divide-stone-200 dark:divide-slate-800">
+                  <thead class="bg-sand-100/80 dark:bg-slate-950/60">
+                    <tr>
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Skill</th>
+                      <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-stone-200 dark:divide-slate-800">
+                    ${contract.items
+                      .map(
+                        (item) => `
+                          <tr>
+                            <td class="px-4 py-3 text-sm">${item.skill}</td>
+                            <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">$${item.price.toLocaleString()}</td>
+                          </tr>
+                        `
+                      )
+                      .join("")}
+                  </tbody>
+                  <tfoot class="bg-sand-100/80 dark:bg-slate-950/60">
+                    <tr>
+                      <td class="px-4 py-3 text-sm font-semibold">Total</td>
+                      <td class="px-4 py-3 text-sm font-semibold">$${contract.totalCost.toLocaleString()}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          `,
+        });
+      }
+
+      function openErrorModal(id) {
+        const error = state.errors.find((entry) => entry.id === Number(id));
+        openModal({
+          eyebrow: "Error detail",
+          title: error.source,
+          body: `
+            <div class="space-y-4">
+              <div class="flex flex-wrap items-center gap-3">
+                ${statusBadge(error.severity)}
+                <span class="text-sm text-slate-500 dark:text-slate-400">${error.timestamp}</span>
+              </div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Summary</p>
+                <p class="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">${error.summary}</p>
+              </div>
+              <div class="rounded-2xl border border-stone-200 p-4 dark:border-slate-800">
+                <p class="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Investigation notes</p>
+                <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">${error.details}</p>
+              </div>
+            </div>
+          `,
+        });
+      }
+
+      function resolveError(id) {
+        const error = state.errors.find((entry) => entry.id === Number(id));
+        if (!error) {
+          return;
+        }
+        error.severity = "Resolved";
+        closeDropdowns();
+        renderSections();
+      }
+
+      document.addEventListener("click", (event) => {
+        const navButton = event.target.closest("[data-nav]");
+        if (navButton) {
+          setSection(navButton.dataset.nav);
+          return;
+        }
+
+        const themeButton = event.target.closest("#theme-toggle");
+        if (themeButton) {
+          toggleTheme();
+          return;
+        }
+
+        const dropdownTrigger = event.target.closest("[data-dropdown-trigger]");
+        if (dropdownTrigger) {
+          toggleDropdown(dropdownTrigger.dataset.dropdownTrigger);
+          return;
+        }
+
+        const dropdownAction = event.target.closest("[data-action]");
+        if (dropdownAction) {
+          const { action, id } = dropdownAction.dataset;
+          closeDropdowns();
+          renderSections();
+          if (action === "view-user") openUserModal(id);
+          if (action === "message-user") openUserModal(id);
+          if (action === "configure-agent") openAgentConfigureModal(id);
+          if (action === "view-agent") openAgentModal(id);
+          if (action === "view-skill") openSkillModal(id);
+          if (action === "audit-skill") openSkillModal(id);
+          if (action === "view-contract") openContractModal(id);
+          if (action === "export-contract") openContractModal(id);
+          if (action === "view-error") openErrorModal(id);
+          if (action === "resolve-error") resolveError(id);
+          return;
+        }
+
+        const agentToggle = event.target.closest("[data-agent-toggle]");
+        if (agentToggle) {
+          const agentId = Number(agentToggle.dataset.agentToggle);
+          if (state.expandedAgents.has(agentId)) {
+            state.expandedAgents.delete(agentId);
+          } else {
+            state.expandedAgents.add(agentId);
+          }
+          renderSections();
+          return;
+        }
+
+        const closeButton = event.target.closest("[data-close-modal]");
+        if (closeButton) {
+          closeModal();
+          return;
+        }
+
+        const modalBackdrop = event.target.closest("[data-modal-backdrop]");
+        if (modalBackdrop) {
+          closeModal();
+          return;
+        }
+
+        const saveAgentButton = event.target.closest("[data-save-agent]");
+        if (saveAgentButton) {
+          const agentId = Number(saveAgentButton.dataset.saveAgent);
+          const textarea = document.querySelector(`[data-agent-prompt="${agentId}"]`);
+          const agent = state.agents.find((entry) => entry.id === agentId);
+          if (textarea && agent) {
+            agent.prompt = textarea.value.trim() || agent.prompt;
+          }
+          closeModal();
+          renderSections();
+          return;
+        }
+
+        if (!event.target.closest("[data-dropdown-menu]")) {
+          if (state.activeDropdown) {
+            closeDropdowns();
+            renderSections();
+          }
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (state.activeModal) {
+            closeModal();
+          }
+          if (state.activeDropdown) {
+            closeDropdowns();
+            renderSections();
+          }
+        }
+      });
+
+      renderApp();
+    </script>
+  </body>
+</html>
