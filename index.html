@@ -630,9 +630,17 @@
         syncThemeControls();
       }
 
+      function applyTheme(theme) {
+        const isDark = theme === "dark";
+        document.documentElement.classList.toggle("dark", isDark);
+        if (document.body) {
+          document.body.classList.toggle("dark", isDark);
+        }
+      }
+
       function syncThemeControls() {
         const isDark = state.theme === "dark";
-        document.documentElement.classList.toggle("dark", isDark);
+        applyTheme(state.theme);
         const label = document.getElementById("theme-toggle-label");
         const button = document.getElementById("theme-toggle");
         label.textContent = isDark ? "Switch to light mode" : "Switch to dark mode";
@@ -892,17 +900,19 @@
         renderSections();
       }
 
+      const themeToggleButton = document.getElementById("theme-toggle");
+      if (themeToggleButton) {
+        themeToggleButton.addEventListener("click", (event) => {
+          event.preventDefault();
+          toggleTheme();
+        });
+      }
+
       document.addEventListener("click", (event) => {
         const navLink = event.target.closest("[data-nav]");
         if (navLink) {
           event.preventDefault();
           setSection(navLink.dataset.nav);
-          return;
-        }
-
-        const themeButton = event.target.closest("#theme-toggle");
-        if (themeButton) {
-          toggleTheme();
           return;
         }
 
